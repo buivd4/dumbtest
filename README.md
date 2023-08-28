@@ -12,8 +12,8 @@ You can find the resources at the corresponding branches:
 1. Install by `pip install .`
 2. Put your scripts to `iterators/` directory
 3. Put target html project to web folder
-4. Start server by typing `lazytestpy start-server`
-5. Start the test (all test will be run) by typing `lazytest execute-test --target <route-to-your-html-file>`. For example: `python lazytest/main.py execute-test --target another-example.html`
+4. Start server by typing `lazytest start-server`
+5. Start the test (all test will be run) by typing `lazytest execute-test --target <route-to-your-html-file>`. For example: `lazytest execute-test --target another-example.html`
 
 
 See more by typing `lazytest -h`
