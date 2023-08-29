@@ -129,6 +129,52 @@ function GetTodayWithFormat() {
   );
 }
 
+function isValidDate(dateString) {
+  // Check if the date string is in a valid date format
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(dateString)) {
+      return false;
+  }
+
+  // Check if the date itself is valid (e.g., not February 30)
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+}
+
+
+function isValidProduct(product) {
+  debugger;
+  if (!product.Name || !product.Maker) {
+    return false
+  }
+
+  if (isNaN(parseFloat(product.Price)) || parseFloat(product.Price) < 0) {
+      return false
+  }
+
+  if (isNaN(parseFloat(product.Amount)) || parseFloat(product.Amount) < 0) {
+      return false
+  }
+
+  if (!isValidDate(product.Date)) {
+    return false
+  }
+
+  return true
+}
+
+function findProductsByName(product) {
+  const matchingProducts = [];
+
+  for (const item of list) {
+      if ((product.Name.toLowerCase() === item.Name.toLowerCase()) && (product.Maker.toLowerCase() === item.Maker.toLowerCase())) {
+          matchingProducts.push(product);
+      }
+  }
+
+  return matchingProducts;
+}
+
 //<!-- ACTIONS -->
 // [Exercise 1] Import Action
 $("#ImportButton").click(function (e) {
@@ -137,15 +183,36 @@ $("#ImportButton").click(function (e) {
 
   CurrentMode = AppMode.ADD_MODE;
   ShowPopup();
-  alert("You must implement this function [Exercise 1]");
 });
 
 // [Exercise 2] Save Action
 $("#SaveButton").click(function (e) {
   e.preventDefault();
-  debugger;
-
-  alert("You must implement this function [Exercise 2]");
+  var newItem = new Product(
+    $("#_id").val(),
+    $("#date").val(),
+    $("#name").val(),
+    $("#maker").val(),
+    $("#price").val(),
+    $("#amount").val(),
+    $("#location").val()
+  );
+  if (!isValidProduct(newItem)){
+    alert("Invalid input");
+  }
+  else{
+    var found=false;
+    for (let i = 0; i < list.length; i++){
+      if ((list[i].Name.toLowerCase() === newItem.Name.toLowerCase()) && (list[i].Maker.toLowerCase() === newItem.Maker.toLowerCase())) {
+        list[i].Amount=newItem.Amount
+        found=true
+      }
+    }
+    if (!found){
+      list.push(newItem)
+    }
+    ShowList(list);
+  }
 });
 
 // [Exercise 3] Edit Action
