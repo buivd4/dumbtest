@@ -203,10 +203,14 @@ $("#SaveButton").click(function (e) {
   else{
     var found=false;
     for (let i = 0; i < list.length; i++){
-      if ((list[i].Name.toLowerCase() === newItem.Name.toLowerCase()) && (list[i].Maker.toLowerCase() === newItem.Maker.toLowerCase())) {
-        list[i].Amount=Number(newItem.Amount)+Number(list[i].Amount)+""
-        found=true
-      }
+      if (CurrentMode===AppMode.ADD_MODE && (list[i].Name.toLowerCase() === newItem.Name.toLowerCase()) && (list[i].Maker.toLowerCase() === newItem.Maker.toLowerCase())) {
+          list[i].Amount=Number(newItem.Amount)+Number(list[i].Amount)+""
+          found=true
+        }
+      if (CurrentMode===AppMode.EDIT_MODE && (list[i].Id === newItem.Id)){
+          list[i]=newItem
+          found=true
+        }
     }
     if (!found){
       list.push(newItem)
@@ -219,11 +223,16 @@ $("#SaveButton").click(function (e) {
 function editProduct(id) {
   debugger;
 
-  if (itemToEdit) {
-    ShowPopup(itemToEdit);
-    $("#SaveButton").off("click").on("click", function() {
-      updateProduct(itemToEdit.Id);
-    });
+  CurrentMode = AppMode.EDIT_MODE;
+  position=0;
+  for (; position < list.length; position++){
+    if (list[position].Id===id){
+      break;
+    }
+  };
+  console.log(position)
+  if (position<list.length) {
+    ShowPopup(list[position]);
   } else {
     alert("Product not found.");
   }
