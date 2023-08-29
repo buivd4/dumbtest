@@ -185,11 +185,65 @@ $("#ImportButton").click(function (e) {
   ShowPopup();
 });
 
+external_id=undefined;
 // [Exercise 2] Save Action
 $("#SaveButton").click(function (e) {
   e.preventDefault();
+  if (CurrentMode==AppMode.EXPORT_MODE){
+    $("#AppTitle").text(AppTitleName.EXPORT_TITLE);
+    $("#ExportButton").text(ExportButtonName.NAME_IN_EXPORT);
+    $("#ImportButton").hide();
+    $("#ShipButton").show();
+    $("#TotalTitle").show();
+    $("#TotalValue").text();
+  
+    // Change the SaveButton action to Export
+    $("#SaveButton").html("Export");
+    $("#SaveButton").removeClass("btn-warning").addClass("btn-success");
+  
+    const product = list.find(item => item.Id === external_id);
+
+    // Get the export amount
+    const exportAmount = $("#amount").val();
+
+    // Check if the export amount is valid
+    if (exportAmount === "" || isNaN(exportAmount) || exportAmount <= 0 || exportAmount > parseInt(product.Amount)) {
+      alert("Invalid export amount. Please enter a valid quantity.");
+      $("#AppTitle").text(AppTitleName.STORE_TITLE);
+      $("#ExportButton").text(ExportButtonName.NAME_IN_STORE);
+      CurrentMode = AppMode.LIST_MODE;
+      $("#ImportButton").show();
+      $("#TotalTitle").hide();
+      $("#ShipButton").hide();
+      ShowList(list);  
+      return;
+    }
+
+    // Update the product's amount
+    product.Amount = (parseInt(product.Amount) - parseInt(exportAmount)).toString();
+    
+    // Create export product
+
+    var index = exportList.findIndex(function(item) {
+      return item.Id === product.Id;
+    });
+    if (index==-1){
+      let exportProduct = Object.assign({}, product);
+      exportProduct.Amount = exportAmount
+      exportList.push(exportProduct)
+    } else{
+      exportList[index].Amount=(parseInt(exportList[index].Amount) + parseInt(exportAmount)).toString();
+    }
+    updateTotal()
+    // Update the list and re-render
+    ShowList(exportList);
+
+    // Close the modals
+    $("#AddEditPopup").modal("hide");
+    return;
+  }
   var newItem = new Product(
-    $("#_id").val(),
+    (Math.random() + 1).toString(36).substring(7),
     $("#date").val(),
     $("#name").val(),
     $("#maker").val(),
@@ -242,6 +296,25 @@ function editProduct(id) {
 // [Exercise 4] Delete Action
 function deleteProduct(id) {
   if (confirm("Are you sure you want to delete this product?")) {
+    if (CurrentMode==AppMode.EXPORT_MODE){
+      var index = exportList.findIndex(function(item) {
+        return item.Id === id;
+      });
+  
+      if (index !== -1) {
+        var index2 = list.findIndex(function(item) {
+          return item.Id === exportList[index].Id;
+        });
+        console.log(exportList[index].Amount)
+        list[index2].Amount=parseInt(exportList[index].Amount)+parseInt(list[index2].Amount)+""
+        exportList.splice(index, 1); // Remove the product from the list
+        updateTotal()
+        ShowList(exportList); // Update the displayed list
+      } else {
+        alert("Product not found.");
+      }
+      return
+    }
     // Find the index of the product with the provided ID in the list
     var index = list.findIndex(function(item) {
       return item.Id === id;
@@ -267,62 +340,17 @@ function updateTotal() {
 }
 // [Exercise 5] Export Action
 function exportProduct(id) {
-  $("#AppTitle").text(AppTitleName.EXPORT_TITLE);
-  $("#ExportButton").text(ExportButtonName.NAME_IN_EXPORT);
-  CurrentMode = AppMode.EXPORT_MODE;
-  $("#ImportButton").hide();
-  $("#ShipButton").show();
-  $("#TotalTitle").show();
-  $("#TotalValue").text();
 
-  // Change the SaveButton action to Export
-  $("#SaveButton").html("Export");
-  $("#SaveButton").removeClass("btn-warning").addClass("btn-success");
+  CurrentMode = AppMode.EXPORT_MODE;
 
   // Find the product by id
+  external_id=id;
+  console.log(id)
   const product = list.find(item => item.Id === id);
 
   if (product) {
     ShowPopup(product);
     // Now let's handle the export process
-
-    // Set the export button action
-    $("#SaveButton").off("click").on("click", function (e) {
-      e.preventDefault();
-
-      // Get the export amount
-      const exportAmount = $("#amount").val();
-
-      // Check if the export amount is valid
-      if (exportAmount === "" || isNaN(exportAmount) || exportAmount <= 0 || exportAmount > parseInt(product.Amount)) {
-        alert("Invalid export amount. Please enter a valid quantity.");
-        return;
-      }
-
-      // Update the product's amount
-      product.Amount = (parseInt(product.Amount) - parseInt(exportAmount)).toString();
-      
-      // Create export product
-  
-      var index = exportList.findIndex(function(item) {
-        return item.Id === product.Id;
-      });
-      if (index==-1){
-        let exportProduct = Object.assign({}, product);
-        exportProduct.Amount = exportAmount
-        exportList.push(exportProduct)
-      } else{
-        exportList[index].Amount=(parseInt(exportList[index].Amount) + parseInt(exportAmount)).toString();
-      }
-      updateTotal()
-      // Update the list and re-render
-      ShowList(exportList);
-
-      // Close the modals
-      $("#AddEditPopup").modal("hide");
-    });
-  } else {
-    alert("Product not found.");
   }
 }
 
