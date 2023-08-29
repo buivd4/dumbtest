@@ -152,7 +152,7 @@ function isValidProduct(product) {
       return false
   }
 
-  if (isNaN(parseFloat(product.Amount)) || parseFloat(product.Amount) < 0) {
+  if (isNaN(parseInt(product.Amount)) || parseInt(product.Amount) < 0) {
       return false
   }
 
@@ -204,7 +204,7 @@ $("#SaveButton").click(function (e) {
     var found=false;
     for (let i = 0; i < list.length; i++){
       if ((list[i].Name.toLowerCase() === newItem.Name.toLowerCase()) && (list[i].Maker.toLowerCase() === newItem.Maker.toLowerCase())) {
-        list[i].Amount=newItem.Amount
+        list[i].Amount=Number(newItem.Amount)+Number(list[i].Amount)+""
         found=true
       }
     }
@@ -219,9 +219,15 @@ $("#SaveButton").click(function (e) {
 function editProduct(id) {
   debugger;
 
-  CurrentMode = AppMode.EDIT_MODE;
-  ShowPopup(item1);
-  alert("You must implement this function [Exercise 3]");
+  if (itemToEdit) {
+    ShowPopup(itemToEdit);
+    $("#SaveButton").off("click").on("click", function() {
+      updateProduct(itemToEdit.Id);
+    });
+  } else {
+    alert("Product not found.");
+  }
+
 }
 
 // [Exercise 4] Delete Action
