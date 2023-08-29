@@ -257,11 +257,27 @@ function deleteProduct(id) {
 }
 
 var exportList = []
-
+var totalValue = 0
+function updateTotal() {
+  totalValue=0.0
+  for (p of exportList){
+    totalValue+=parseInt(p.Amount)*parseFloat(p.Price)
+  }
+  $("#TotalValue").text(totalValue);
+}
 // [Exercise 5] Export Action
 function exportProduct(id) {
-
+  $("#AppTitle").text(AppTitleName.EXPORT_TITLE);
+  $("#ExportButton").text(ExportButtonName.NAME_IN_EXPORT);
   CurrentMode = AppMode.EXPORT_MODE;
+  $("#ImportButton").hide();
+  $("#ShipButton").show();
+  $("#TotalTitle").show();
+  $("#TotalValue").text();
+
+  // Change the SaveButton action to Export
+  $("#SaveButton").html("Export");
+  $("#SaveButton").removeClass("btn-warning").addClass("btn-success");
 
   // Find the product by id
   const product = list.find(item => item.Id === id);
@@ -298,6 +314,7 @@ function exportProduct(id) {
       } else{
         exportList[index].Amount=(parseInt(exportList[index].Amount) + parseInt(exportAmount)).toString();
       }
+      updateTotal()
       // Update the list and re-render
       ShowList(exportList);
 
@@ -320,12 +337,14 @@ $("#ExportButton").click(function () {
     $("#ImportButton").hide();
     $("#ShipButton").show();
     $("#TotalTitle").show();
-    
+    $("#TotalValue").text();
+
     // Change the SaveButton action to Export
     $("#SaveButton").html("Export");
     $("#SaveButton").removeClass("btn-warning").addClass("btn-success");
 
     // Show the export modal with empty fields
+    updateTotal()
     ShowList(exportList);
   } else {
     // Update list
@@ -347,90 +366,114 @@ $("#ShipButton").click(function () {
   $("#TotalTitle").hide();
   $("#ShipButton").hide();
   $("#ImportButton").show();
-  alert("You must implement this function [Exercise 7]");
+  exportList=[];
+  updateTotal()
+  ShowList(list);
+
 });
 
 // [Exercise 8] Search Action
 $("#SearchButton").click(function () {
-  var keyword = $("#keySearch").val();
-  if (keyword.trim() === "") {
-    alert("Please enter a keyword for search.");
-    return;
+  if (CurrentMode == AppMode.EXPORT_MODE){
+    var showingList=exportList
+  } else {
+    var showingList=list
   }
-
-  var filteredList = list.filter(function(item) {
-    return (
-      item.Name.toLowerCase().includes(keyword.toLowerCase()) ||
-      item.Maker.toLowerCase().includes(keyword.toLowerCase())
-    );
-  });
+  var keyword = $("#keySearch").val();
+  var filteredList = [];
+  if (keyword.trim() === "") {
+    filteredList = showingList;
+  }
+  else{
+    filteredList = showingList.filter(function(item) {
+      return (
+        item.Name.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.Maker.toLowerCase().includes(keyword.toLowerCase())
+      );
+    });
+  
+  }
   ShowList(filteredList);
 });
 
 // [Exercise 9] Sort Price Action
 $("#PriceSortButton").click(function () {
-  sortProductsByPrice();
-  ShowList(list); // Update the displayed list with sorted results
+  if (CurrentMode == AppMode.EXPORT_MODE){
+    var showingList=exportList
+  } else {
+    var showingList=list
+  }
+  ShowList(sortProductsByPrice(showingList)); // Update the displayed list with sorted results
 });
 
-function sortProductsByPrice() {
+function sortProductsByPrice(plist) {
   if (CurrentPriceOrder === "NONE") CurrentPriceOrder=SortOrder.ASC
   if (CurrentPriceOrder === SortOrder.ASC) {
-    list.sort(function (a, b) {
+    plist.sort(function (a, b) {
       return parseFloat(a.Price) - parseFloat(b.Price);
     });
     CurrentPriceOrder = SortOrder.DESC;
     $("#PriceSortIcon").removeClass("fa fa-angle-up");
     $("#PriceSortIcon").addClass("fa fa-angle-down");
   } else {
-    list.sort(function (a, b) {
+    plist.sort(function (a, b) {
       return parseFloat(b.Price) - parseFloat(a.Price);
     });
     CurrentPriceOrder = SortOrder.ASC;
     $("#PriceSortIcon").removeClass("fa fa-angle-down");
     $("#PriceSortIcon").addClass("fa fa-angle-up");
   }
+  return plist;
 }
 
 
 // [Exercise 10] Sort Date Action
 $("#DateSortButton").click(function () {
-  sortProductsByDate();
-  ShowList(list); // Update the displayed list with sorted results
+  if (CurrentMode == AppMode.EXPORT_MODE){
+    var showingList=exportList
+  } else {
+    var showingList=list
+  }
+  ShowList(sortProductsByDate(showingList)); // Update the displayed list with sorted results
 });
 
-function sortProductsByDate() {
+function sortProductsByDate(plist) {
   if (CurrentDateOrder === "NONE") CurrentDateOrder=SortOrder.ASC
   if (CurrentDateOrder === SortOrder.ASC) {
-    list.sort(function (a, b) {
+    plist.sort(function (a, b) {
       return new Date(a.Date) - new Date(b.Date);
     });
     CurrentDateOrder = SortOrder.DESC;
     $("#DateSortIcon").removeClass("fa fa-angle-up");
     $("#DateSortIcon").addClass("fa fa-angle-down");
   } else {
-    list.sort(function (a, b) {
+    plist.sort(function (a, b) {
       return new Date(b.Date) - new Date(a.Date);
     });
     CurrentDateOrder = SortOrder.ASC;
     $("#DateSortIcon").removeClass("fa fa-angle-down");
     $("#DateSortIcon").addClass("fa fa-angle-up");
   }
+  return plist;
 }
 
 // [Exercise 11] Filter text Action
 $("#FilterInputText").on("input", function () {
+  if (CurrentMode == AppMode.EXPORT_MODE){
+    var showingList=exportList
+  } else {
+    var showingList=list
+  }
   var filterText = $(this).val().trim();
-  console.log(filterText)
-  ShowList(filterProductsByText(filterText)); // Update the displayed list with filtered results
+  ShowList(filterProductsByText(filterText, showingList)); // Update the displayed list with filtered results
 });
 
-function filterProductsByText(text) {
+function filterProductsByText(text, plist) {
   if (text === "") {
-    return list;
+    return plist;
   }
 
-  return list.filter(function (item) {
+  return plist.filter(function (item) {
     return (
       item.Name.toLowerCase().includes(text.toLowerCase()) ||
       item.Maker.toLowerCase().includes(text.toLowerCase())
@@ -440,22 +483,26 @@ function filterProductsByText(text) {
 
 // [Exercise 12] Filter list Action
 $("#FilterStatusDropDownList").change(function () {
-  var selectedValue = $(this).val();
-  ShowList(filterProductsByStatus(selectedValue));
-});
-
-function filterProductsByStatus(status) {
-  if (status === "-1") {
-    return list;
+  if (CurrentMode == AppMode.EXPORT_MODE){
+    var showingList=exportList
+  } else {
+    var showingList=list
   }
 
-  return list.filter(function (item) {
+  var selectedValue = $(this).val();
+  ShowList(filterProductsByStatus(selectedValue, showingList));
+});
+
+function filterProductsByStatus(status, plist) {
+  if (status === "-1") {
+    return plist;
+  }
+
+  return plist.filter(function (item) {
     if (status === "1") {
       return parseInt(item.Amount) > 0;
     } else if (status === "0") {
       return parseInt(item.Amount) === 0;
     }
   });
-
-  list = filteredList;
 }
