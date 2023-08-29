@@ -241,13 +241,19 @@ function editProduct(id) {
 
 // [Exercise 4] Delete Action
 function deleteProduct(id) {
-  debugger;
-  // let text = "Are you sure to delete?";
-  // if (!confirm(text)) {
-  //   return 0;
-  // }
+  if (confirm("Are you sure you want to delete this product?")) {
+    // Find the index of the product with the provided ID in the list
+    var index = list.findIndex(function(item) {
+      return item.Id === id;
+    });
 
-  alert("You must implement this function [Exercise 4]");
+    if (index !== -1) {
+      list.splice(index, 1); // Remove the product from the list
+      ShowList(list); // Update the displayed list
+    } else {
+      alert("Product not found.");
+    }
+  }
 }
 
 // [Exercise 5] Export Action
@@ -298,61 +304,110 @@ $("#ShipButton").click(function () {
 
 // [Exercise 8] Search Action
 $("#SearchButton").click(function () {
-  debugger;
-  alert("You must implement this function [Exercise 8]");
+  var keyword = $("#keySearch").val();
+  if (keyword.trim() === "") {
+    alert("Please enter a keyword for search.");
+    return;
+  }
+
+  var filteredList = list.filter(function(item) {
+    return (
+      item.Name.toLowerCase().includes(keyword.toLowerCase()) ||
+      item.Maker.toLowerCase().includes(keyword.toLowerCase())
+    );
+  });
+  ShowList(filteredList);
 });
 
 // [Exercise 9] Sort Price Action
 $("#PriceSortButton").click(function () {
-  debugger;
-
-  // sort state
-  switch (CurrentPriceOrder) {
-    case SortOrder.NONE:
-    case SortOrder.DESC:
-      CurrentPriceOrder = SortOrder.ASC;
-      $("#PriceSortIcon").removeClass("fa fa-angle-down");
-      $("#PriceSortIcon").addClass("fa fa-angle-up");
-      break;
-    case SortOrder.ASC:
-      CurrentPriceOrder = SortOrder.DESC;
-      $("#PriceSortIcon").removeClass("fa fa-angle-up");
-      $("#PriceSortIcon").addClass("fa fa-angle-down");
-      break;
-  }
-
-  alert("You must implement this function [Exercise 9]");
+  sortProductsByPrice();
+  ShowList(list); // Update the displayed list with sorted results
 });
+
+function sortProductsByPrice() {
+  if (CurrentPriceOrder === "NONE") CurrentPriceOrder=SortOrder.ASC
+  if (CurrentPriceOrder === SortOrder.ASC) {
+    list.sort(function (a, b) {
+      return parseFloat(a.Price) - parseFloat(b.Price);
+    });
+    CurrentPriceOrder = SortOrder.DESC;
+    $("#PriceSortIcon").removeClass("fa fa-angle-up");
+    $("#PriceSortIcon").addClass("fa fa-angle-down");
+  } else {
+    list.sort(function (a, b) {
+      return parseFloat(b.Price) - parseFloat(a.Price);
+    });
+    CurrentPriceOrder = SortOrder.ASC;
+    $("#PriceSortIcon").removeClass("fa fa-angle-down");
+    $("#PriceSortIcon").addClass("fa fa-angle-up");
+  }
+}
+
 
 // [Exercise 10] Sort Date Action
 $("#DateSortButton").click(function () {
-  debugger;
-
-  // sort state
-  switch (CurrentDateOrder) {
-    case SortOrder.NONE:
-    case SortOrder.DESC:
-      CurrentDateOrder = SortOrder.ASC;
-      $("#DateSortIcon").removeClass("fa fa-angle-down");
-      $("#DateSortIcon").addClass("fa fa-angle-up");
-      break;
-    case SortOrder.ASC:
-      CurrentDateOrder = SortOrder.DESC;
-      $("#DateSortIcon").removeClass("fa fa-angle-up");
-      $("#DateSortIcon").addClass("fa fa-angle-down");
-      break;
-  }
-  alert("You must implement this function [Exercise 10]");
+  sortProductsByDate();
+  ShowList(list); // Update the displayed list with sorted results
 });
+
+function sortProductsByDate() {
+  if (CurrentDateOrder === "NONE") CurrentDateOrder=SortOrder.ASC
+  if (CurrentDateOrder === SortOrder.ASC) {
+    list.sort(function (a, b) {
+      return new Date(a.Date) - new Date(b.Date);
+    });
+    CurrentDateOrder = SortOrder.DESC;
+    $("#DateSortIcon").removeClass("fa fa-angle-up");
+    $("#DateSortIcon").addClass("fa fa-angle-down");
+  } else {
+    list.sort(function (a, b) {
+      return new Date(b.Date) - new Date(a.Date);
+    });
+    CurrentDateOrder = SortOrder.ASC;
+    $("#DateSortIcon").removeClass("fa fa-angle-down");
+    $("#DateSortIcon").addClass("fa fa-angle-up");
+  }
+}
 
 // [Exercise 11] Filter text Action
 $("#FilterInputText").on("input", function () {
-  debugger;
-  alert("You must implement this function [Exercise 11]");
+  var filterText = $(this).val().trim();
+  console.log(filterText)
+  ShowList(filterProductsByText(filterText)); // Update the displayed list with filtered results
 });
+
+function filterProductsByText(text) {
+  if (text === "") {
+    return list;
+  }
+
+  return list.filter(function (item) {
+    return (
+      item.Name.toLowerCase().includes(text.toLowerCase()) ||
+      item.Maker.toLowerCase().includes(text.toLowerCase())
+    );
+  });
+}
 
 // [Exercise 12] Filter list Action
 $("#FilterStatusDropDownList").change(function () {
-  debugger;
-  alert("You must implement this function [Exercise 12]");
+  var selectedValue = $(this).val();
+  ShowList(filterProductsByStatus(selectedValue));
 });
+
+function filterProductsByStatus(status) {
+  if (status === "-1") {
+    return list;
+  }
+
+  return list.filter(function (item) {
+    if (status === "1") {
+      return parseInt(item.Amount) > 0;
+    } else if (status === "0") {
+      return parseInt(item.Amount) === 0;
+    }
+  });
+
+  list = filteredList;
+}
