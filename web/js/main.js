@@ -242,8 +242,17 @@ $("#SaveButton").click(function (e) {
     $("#AddEditPopup").modal("hide");
     return;
   }
+  var uuid;
+  if (CurrentMode==AppMode.ADD_MODE){
+    uuid=(Math.random() + 1).toString(36).substring(7)
+
+  }
+  else{
+    uuid=$("#_id").val()
+
+  }
   var newItem = new Product(
-    (Math.random() + 1).toString(36).substring(7),
+    uuid,
     $("#date").val(),
     $("#name").val(),
     $("#maker").val(),
