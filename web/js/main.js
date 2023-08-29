@@ -256,15 +256,57 @@ function deleteProduct(id) {
   }
 }
 
+var exportList = []
+
 // [Exercise 5] Export Action
 function exportProduct(id) {
-  debugger;
 
   CurrentMode = AppMode.EXPORT_MODE;
 
-  // Show pop up
-  ShowPopup(item1);
-  alert("You must implement this function [Exercise 5]");
+  // Find the product by id
+  const product = list.find(item => item.Id === id);
+
+  if (product) {
+    ShowPopup(product);
+    // Now let's handle the export process
+
+    // Set the export button action
+    $("#SaveButton").off("click").on("click", function (e) {
+      e.preventDefault();
+
+      // Get the export amount
+      const exportAmount = $("#amount").val();
+
+      // Check if the export amount is valid
+      if (exportAmount === "" || isNaN(exportAmount) || exportAmount <= 0 || exportAmount > parseInt(product.Amount)) {
+        alert("Invalid export amount. Please enter a valid quantity.");
+        return;
+      }
+
+      // Update the product's amount
+      product.Amount = (parseInt(product.Amount) - parseInt(exportAmount)).toString();
+      
+      // Create export product
+  
+      var index = exportList.findIndex(function(item) {
+        return item.Id === product.Id;
+      });
+      if (index==-1){
+        let exportProduct = Object.assign({}, product);
+        exportProduct.Amount = exportAmount
+        exportList.push(exportProduct)
+      } else{
+        exportList[index].Amount=(parseInt(exportList[index].Amount) + parseInt(exportAmount)).toString();
+      }
+      // Update the list and re-render
+      ShowList(exportList);
+
+      // Close the modals
+      $("#AddEditPopup").modal("hide");
+    });
+  } else {
+    alert("Product not found.");
+  }
 }
 
 // [Exercise 6] Export Process
@@ -278,6 +320,13 @@ $("#ExportButton").click(function () {
     $("#ImportButton").hide();
     $("#ShipButton").show();
     $("#TotalTitle").show();
+    
+    // Change the SaveButton action to Export
+    $("#SaveButton").html("Export");
+    $("#SaveButton").removeClass("btn-warning").addClass("btn-success");
+
+    // Show the export modal with empty fields
+    ShowList(exportList);
   } else {
     // Update list
     $("#AppTitle").text(AppTitleName.STORE_TITLE);
@@ -286,9 +335,8 @@ $("#ExportButton").click(function () {
     $("#ImportButton").show();
     $("#TotalTitle").hide();
     $("#ShipButton").hide();
+    ShowList(list);
   }
-  ShowList(list);
-  alert("You must implement this function [Exercise 6]");
 });
 
 // [Exercise 7] Shipment Action
