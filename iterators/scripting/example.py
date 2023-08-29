@@ -1,11 +1,11 @@
 import time
 import logging
-from lazytest.classes.AbstractTestIterator import AbstractTestIterator
+from lazytest.classes.AbstractScriptingTest import AbstractScriptingTest
 from selenium.webdriver.common.by import By
 
-class TestIterator(AbstractTestIterator):
+class TestIterator(AbstractScriptingTest):
     __describe__="This test is for something, some purpose..."
-
+    execution_time=0
     def exec(self):
 
         # Wait for a few seconds to let the page load

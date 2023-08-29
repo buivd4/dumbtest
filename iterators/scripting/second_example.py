@@ -1,10 +1,11 @@
 import time
 import logging
-from lazytest.classes.AbstractTestIterator import AbstractTestIterator
+from lazytest.classes.AbstractScriptingTest import AbstractScriptingTest
 from selenium.webdriver.common.by import By
 
-class SecondTestIterator(AbstractTestIterator):
+class SecondTestIterator(AbstractScriptingTest):
     __describe__="Version 2: This test is for something, some purpose..."
+    execution_time=0
 
     def exec(self):
 

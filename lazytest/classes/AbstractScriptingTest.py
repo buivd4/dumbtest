@@ -1,5 +1,6 @@
 import logging
-class AbstractTestIterator:
+class AbstractScriptingTest:
+    execution_time=1
     def __init__(self, driver, port, target) -> None:
         self.driver = driver
         self.driver.get(f"http://localhost:{port}/{target}")

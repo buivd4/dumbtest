@@ -2,8 +2,7 @@ import argparse
 import logging
 
 START_SERVER_COMMAND="start-server"
-EXECUTE_TEST_COMMAND="execute-test"
-FUZZY_COMMAND="fuzzy"
+EXECUTE_TEST_COMMAND="run"
 
 def args_validate(args):
     pass
@@ -18,16 +17,10 @@ def cli():
     start_web_parser.add_argument('--port', type=int, default=8000, help="Port number for the start-web feature")
 
     execute_test_parser = subparsers.add_parser(EXECUTE_TEST_COMMAND, help="Execute the test feature")
-    execute_test_parser.add_argument('--chrome-driver-path', type=str, default="dependencies/chromedriver_mac64/chromedriver", help="Chrome driver path for test feature")
-    execute_test_parser.add_argument('--port', type=int, default=8000, help="Port number for test feature")
-    execute_test_parser.add_argument('--target', type=str, default="example.html", help="Target for test feature")
-    execute_test_parser.add_argument('-d','--iterator_dir', type=str, default="iterators/", help="Path of script directory to execute")
-
-    fuzzy_parser = subparsers.add_parser(FUZZY_COMMAND, help="Use the fuzzy feature")
-    fuzzy_parser.add_argument('--chrome-driver-path', type=str, default="dependencies/chromedriver_mac64/chromedriver", help="Chrome driver path for fuzzy feature")
-    fuzzy_parser.add_argument('--port', type=int, default=8000, help="Port number for fuzzy feature")
-    fuzzy_parser.add_argument('--target', type=str, default="example.html", help="Target for fuzzy feature")
-    fuzzy_parser.add_argument('-d','--iterator_dir', type=str, default="iterators/", help="Path of script directory to execute")
+    execute_test_parser.add_argument('-c','--chrome-driver-path', type=str, default="dependencies/chromedriver_mac64/chromedriver", help="Chrome driver path for test feature")
+    execute_test_parser.add_argument('-p','--port', type=int, default=8000, help="Port number for test feature")
+    execute_test_parser.add_argument('-t','--target', type=str, default="example.html", help="Target for test feature")
+    execute_test_parser.add_argument('-d','--run-dir', type=str, default="iterators/", help="Path of script directory to execute")
 
     args = parser.parse_args()
     args_validate(args)
